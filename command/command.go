@@ -34,3 +34,27 @@ var spaceSplit = []byte{32}
 func UnknownCmd(db *db.DB, data[] byte) []byte {
 	return UnknownReply
 }
+
+var cmds = map[string]Cmd{
+    "get": GetCmd,
+    "set": SetCmd,
+    "incr": IncrCmd,
+    "incrby": IncrByCmd,
+    "decr": DecrCmd,
+    "decrby": DecrByCmd,
+    "lpush": LPushCmd,
+    "rpush": RPushCmd,
+    "lpop": LPopCmd,
+    "rpop": RPopCmd,
+    "lindex": LIndexCmd,
+    "expire": ExpireCmd,
+}
+
+func GetCommand(s string) Cmd {
+    cmd, ok := cmds[s]
+    if ok {
+        return cmd
+    }
+
+    return UnknownCmd
+}

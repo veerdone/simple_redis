@@ -20,12 +20,13 @@ import "unsafe"
 
 const (
 	STRING uint8 = 1
-	INT uint8 = 2
+	INT    uint8 = 2
+	LIST   uint8 = 3
 )
 
 type Entity struct {
-	Types uint8
-	Data unsafe.Pointer
+	Types    uint8
+	Data     unsafe.Pointer
 	LastRead int64
 	ExpireAt int64
 }

@@ -19,6 +19,7 @@ package command
 import (
 	"bytes"
 	"strconv"
+	"time"
 	"unsafe"
 
 	"github.com/veerdone/simple_redis/db"
@@ -103,8 +104,8 @@ func IncrByCmd(d *db.DB, data []byte) []byte {
 	if len(splitBytes) != 2 {
 		return WrongNumArgReply
 	}
-	key := string(spaceSplit[0])
-	incrNum, err := strconv.ParseInt(string(spaceSplit[1]), 10, 64)
+	key := string(splitBytes[0])
+	incrNum, err := strconv.ParseInt(string(splitBytes[1]), 10, 64)
 	if err != nil {
 		return WrongValue
 	}
@@ -124,18 +125,43 @@ func DecrByCmd(d *db.DB, data []byte) []byte {
 	if len(splitBytes) != 2 {
 		return WrongNumArgReply
 	}
-	key := string(spaceSplit[0])
-	decrNum, err := strconv.ParseInt(string(spaceSplit[1]), 10, 64)
-	if err != nil {
-		return WrongValue
-	}
+	key := string(splitBytes[0])
 	entity := d.Get(key)
 	if entity == nil {
 		return NilReply
+	}
+	decrNum, err := strconv.ParseInt(string(splitBytes[1]), 10, 64)
+	if err != nil {
+		return WrongValue
 	}
 
 	num := (*int64)(entity.Data)
 	*num -= decrNum
 
 	return []byte(strconv.FormatInt(*num, 10))
+}
+
+func ExpireCmd(d *db.DB, data []byte) []byte {
+	splitBytes := bytes.SplitN(data, spaceSplit, 2)
+	if len(splitBytes) != 2 {
+		return WrongNumArgReply
+	}
+	key := string(splitBytes[0])
+	entity := d.Get(key)
+	if entity == nil {
+		return NilReply
+	}
+
+	sec, err := strconv.ParseInt(string(splitBytes[1]), 10, 64)
+	if err == nil {
+		return WrongValue
+	}
+
+	if entity.ExpireAt != 0 {
+		entity.ExpireAt += (sec * 1000)
+	} else {
+		entity.ExpireAt = time.Now().Add(time.Second * time.Duration(sec)).UnixMilli()
+	}
+	
+	return OKReply
 }

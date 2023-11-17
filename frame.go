@@ -33,22 +33,8 @@ type Frame []byte
 func (f Frame) GetCmd() command.Cmd {
 	cmdBytes := f[1 : 1+f[0]]
 	str := string(cmdBytes)
-	switch str {
-	case "get":
-		return command.GetCmd
-	case "set":
-		return command.SetCmd
-	case "incr":
-		return command.IncrCmd
-	case "decr":
-		return command.DecrCmd
-	case "incrby":
-		return command.IncrByCmd
-	case "decrby":
-		return command.DecrByCmd
-	default:
-		return command.UnknownCmd
-	}
+	
+	return command.GetCommand(str)
 }
 
 func (f Frame) GetData() []byte {
