@@ -46,115 +46,115 @@ func SetCmd(d *db.DB, data []byte) []byte {
 	}
 	d.Set(key, entity)
 
-	return OKReply
+	return strResp(OKReply)
 }
 
 func GetCmd(d *db.DB, data []byte) []byte {
 	key := string(data)
 	entity := d.Get(key)
 	if entity == nil {
-		return NilReply
+		return errResp(NilReply)
 	}
 	switch entity.Types {
 	case db.STRING:
 		s := (*[]byte)(entity.Data)
-		return *s
+		return dataResp(*s)
 	case db.INT:
 		i := (*int64)(entity.Data)
-		return []byte(strconv.FormatInt(*i, 10))
+		return numberResp([]byte(strconv.FormatInt(*i, 10)))
 	}
 
-	return WrongTypeReply
+	return errResp(WrongNumArgReply)
 }
 
 func IncrCmd(d *db.DB, data []byte) []byte {
 	key := string(data)
 	entity := d.Get(key)
 	if entity == nil {
-		return NilReply
+		return errResp(NilReply)
 	}
 	if entity.Types != db.INT {
-		return WrongTypeReply
+		return errResp(WrongTypeReply)
 	}
 
 	num := (*int64)(entity.Data)
 	*num = *num + 1
 
-	return []byte(strconv.FormatInt(*num, 10))
+	return numberResp([]byte(strconv.FormatInt(*num, 10)))
 }
 
 func DecrCmd(d *db.DB, data []byte) []byte {
 	key := string(data)
 	entity := d.Get(key)
 	if entity == nil {
-		return NilReply
+		return errResp(NilReply)
 	}
 	if entity.Types != db.INT {
-		return WrongTypeReply
+		return errResp(WrongTypeReply)
 	}
 
 	num := (*int64)(entity.Data)
 	*num = *num - 1
 
-	return []byte(strconv.FormatInt(*num, 10))
+	return numberResp([]byte(strconv.FormatInt(*num, 10)))
 }
 
 func IncrByCmd(d *db.DB, data []byte) []byte {
 	splitBytes := bytes.SplitN(data, spaceSplit, 2)
 	if len(splitBytes) != 2 {
-		return WrongNumArgReply
+		return errResp(WrongNumArgReply)
 	}
 	key := string(splitBytes[0])
 	incrNum, err := strconv.ParseInt(string(splitBytes[1]), 10, 64)
 	if err != nil {
-		return WrongValue
+		return errResp(WrongValue)
 	}
 	entity := d.Get(key)
 	if entity == nil {
-		return NilReply
+		return errResp(NilReply)
 	}
 
 	num := (*int64)(entity.Data)
 	*num += incrNum
 
-	return []byte(strconv.FormatInt(*num, 10))
+	return numberResp([]byte(strconv.FormatInt(*num, 10)))
 }
 
 func DecrByCmd(d *db.DB, data []byte) []byte {
 	splitBytes := bytes.SplitN(data, spaceSplit, 2)
 	if len(splitBytes) != 2 {
-		return WrongNumArgReply
+		return errResp(WrongNumArgReply)
 	}
 	key := string(splitBytes[0])
 	entity := d.Get(key)
 	if entity == nil {
-		return NilReply
+		return errResp(NilReply)
 	}
 	decrNum, err := strconv.ParseInt(string(splitBytes[1]), 10, 64)
 	if err != nil {
-		return WrongValue
+		return errResp(WrongValue)
 	}
 
 	num := (*int64)(entity.Data)
 	*num -= decrNum
 
-	return []byte(strconv.FormatInt(*num, 10))
+	return numberResp([]byte(strconv.FormatInt(*num, 10)))
 }
 
 func ExpireCmd(d *db.DB, data []byte) []byte {
 	splitBytes := bytes.SplitN(data, spaceSplit, 2)
 	if len(splitBytes) != 2 {
-		return WrongNumArgReply
+		return errResp(WrongNumArgReply)
 	}
 	key := string(splitBytes[0])
 	entity := d.Get(key)
 	if entity == nil {
-		return NilReply
+		return errResp(NilReply)
 	}
 
 	sec, err := strconv.ParseInt(string(splitBytes[1]), 10, 64)
 	if err == nil {
-		return WrongValue
+		return errResp(WrongValue)
 	}
 
 	if entity.ExpireAt != 0 {
@@ -162,6 +162,6 @@ func ExpireCmd(d *db.DB, data []byte) []byte {
 	} else {
 		entity.ExpireAt = time.Now().Add(time.Second * time.Duration(sec)).UnixMilli()
 	}
-	
-	return OKReply
+
+	return strResp(OKReply)
 }

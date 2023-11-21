@@ -10,21 +10,21 @@ import (
 func LPushCmd(d *db.DB, data []byte) []byte {
 	splitBytes := bytes.SplitN(data, spaceSplit, 2)
 	if len(splitBytes) != 2 {
-		return WrongNumArgReply
+		return errResp(WrongNumArgReply)
 	}
 
 	key := string(spaceSplit[0])
 	entity := d.Get(key)
 	if entity == nil {
-		return NilReply
+		return errResp(NilReply)
 	}
 	if entity.Types != db.LIST {
-		return WrongTypeReply
+		return errResp(WrongTypeReply)
 	}
 	list := (*db.List)(entity.Data)
 	list.LPush(splitBytes[1])
 
-	return OKReply
+	return strResp(OKReply)
 }
 
 func LPopCmd(d *db.DB, data []byte) []byte {
@@ -32,10 +32,10 @@ func LPopCmd(d *db.DB, data []byte) []byte {
 
 	entity := d.Get(key)
 	if entity == nil {
-		return NilReply
+		return errResp(NilReply)
 	}
 	if entity.Types != db.LIST {
-		return WrongTypeReply
+		return errResp(WrongTypeReply)
 	}
 
 	list := (*db.List)(entity.Data)
@@ -44,27 +44,27 @@ func LPopCmd(d *db.DB, data []byte) []byte {
 		d.Del(key)
 	}
 
-	return reply
+	return dataResp(reply)
 }
 
 func RPushCmd(d *db.DB, data []byte) []byte {
 	splitBytes := bytes.SplitN(data, spaceSplit, 2)
 	if len(splitBytes) != 2 {
-		return WrongNumArgReply
+		return errResp(WrongNumArgReply)
 	}
 
 	key := string(spaceSplit[0])
 	entity := d.Get(key)
 	if entity == nil {
-		return NilReply
+		return errResp(NilReply)
 	}
 	if entity.Types != db.LIST {
-		return WrongTypeReply
+		return errResp(WrongTypeReply)
 	}
 	list := (*db.List)(entity.Data)
 	list.RPush(splitBytes[1])
 
-	return OKReply
+	return strResp(OKReply)
 }
 
 func RPopCmd(d *db.DB, data []byte) []byte {
@@ -72,10 +72,10 @@ func RPopCmd(d *db.DB, data []byte) []byte {
 
 	entity := d.Get(key)
 	if entity == nil {
-		return NilReply
+		return errResp(NilReply)
 	}
 	if entity.Types != db.LIST {
-		return WrongTypeReply
+		return errResp(WrongTypeReply)
 	}
 
 	list := (*db.List)(entity.Data)
@@ -84,28 +84,55 @@ func RPopCmd(d *db.DB, data []byte) []byte {
 		d.Del(key)
 	}
 
-	return reply
+	return dataResp(reply)
 }
 
 func LIndexCmd(d *db.DB, data []byte) []byte {
 	splitBytes := bytes.SplitN(data, spaceSplit, 2)
 	if len(splitBytes) != 2 {
-		return WrongNumArgReply
+		return errResp(WrongNumArgReply)
 	}
 
-	key := string(spaceSplit[0])
+	key := string(splitBytes[0])
 	entity := d.Get(key)
 	if entity == nil {
-		return NilReply
+		return errResp(NilReply)
 	}
 	if entity.Types != db.LIST {
-		return WrongTypeReply
+		return errResp(WrongTypeReply)
 	}
 	index, err := strconv.Atoi(string(splitBytes[1]))
 	if err != nil {
-		return WrongValue
+		return errResp(WrongValue)
 	}
 	list := (*db.List)(entity.Data)
 
-	return list.Index(index)
+	return dataResp(list.Index(index))
+}
+
+func LRangeCmd(d *db.DB, data []byte) []byte {
+	splitBytes := bytes.SplitN(data, spaceSplit, 3)
+	if len(splitBytes) != 3 {
+		return errResp(WrongNumArgReply)
+	}
+
+	key := string(splitBytes[0])
+	entity := d.Get(key)
+	if entity == nil {
+		return errResp(NilReply)
+	}
+	if entity.Types != db.LIST {
+		return errResp(WrongTypeReply)
+	}
+	start, err := strconv.Atoi(string(splitBytes[1]))
+	if err != nil {
+		return errResp(WrongValue)
+	}
+	end, err := strconv.Atoi(string(splitBytes[2]))
+	if err != nil {
+		return errResp(WrongValue)
+	}
+	list := (*db.List)(entity.Data)
+
+	return multiResp(list.Range(start, end))
 }

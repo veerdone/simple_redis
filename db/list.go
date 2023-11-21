@@ -97,11 +97,29 @@ func (l *List) Index(index int) []byte {
 	}
 	n := l.head
 	for i := 0; i <= index; i++ {
-		if i == index {
-			return n.data
-		}
 		n = n.next
 	}
 
+	if n != nil {
+		return n.data
+	}
+
 	return nil
+}
+
+func (l *List) Range(start, end int) [][]byte {
+	n := end - start
+	b := make([][]byte, 0, n)
+	
+	h := l.head
+	for i := 0; i <= start; i++ {
+		h = h.next
+	}
+
+	for i := start; i < end; i++ {
+		b = append(b, h.data)
+		h = h.next
+	}
+	
+	return b
 }
