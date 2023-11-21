@@ -100,18 +100,16 @@ func DecrCmd(d *db.DB, data []byte) []byte {
 }
 
 func IncrByCmd(d *db.DB, data []byte) []byte {
-	splitBytes := bytes.SplitN(data, spaceSplit, 2)
-	if len(splitBytes) != 2 {
-		return errResp(WrongNumArgReply)
+	sd := CheckArgsNumAndKeyExist(data, 2, d)
+	if len(sd.errBytes) != 0 {
+		return sd.errBytes
 	}
-	key := string(splitBytes[0])
+
+	entity := sd.entity
+	splitBytes := sd.splitBytes
 	incrNum, err := strconv.ParseInt(string(splitBytes[1]), 10, 64)
 	if err != nil {
 		return errResp(WrongValue)
-	}
-	entity := d.Get(key)
-	if entity == nil {
-		return errResp(NilReply)
 	}
 
 	num := (*int64)(entity.Data)
@@ -121,15 +119,13 @@ func IncrByCmd(d *db.DB, data []byte) []byte {
 }
 
 func DecrByCmd(d *db.DB, data []byte) []byte {
-	splitBytes := bytes.SplitN(data, spaceSplit, 2)
-	if len(splitBytes) != 2 {
-		return errResp(WrongNumArgReply)
+	sd := CheckArgsNumAndKeyExist(data, 2, d)
+	if len(sd.errBytes) != 0 {
+		return sd.errBytes
 	}
-	key := string(splitBytes[0])
-	entity := d.Get(key)
-	if entity == nil {
-		return errResp(NilReply)
-	}
+
+	entity := sd.entity
+	splitBytes := sd.splitBytes
 	decrNum, err := strconv.ParseInt(string(splitBytes[1]), 10, 64)
 	if err != nil {
 		return errResp(WrongValue)
@@ -142,15 +138,13 @@ func DecrByCmd(d *db.DB, data []byte) []byte {
 }
 
 func ExpireCmd(d *db.DB, data []byte) []byte {
-	splitBytes := bytes.SplitN(data, spaceSplit, 2)
-	if len(splitBytes) != 2 {
-		return errResp(WrongNumArgReply)
+	sd := CheckArgsNumAndKeyExist(data, 2, d)
+	if len(sd.errBytes) != 0 {
+		return sd.errBytes
 	}
-	key := string(splitBytes[0])
-	entity := d.Get(key)
-	if entity == nil {
-		return errResp(NilReply)
-	}
+
+	entity := sd.entity
+	splitBytes := sd.splitBytes
 
 	sec, err := strconv.ParseInt(string(splitBytes[1]), 10, 64)
 	if err == nil {

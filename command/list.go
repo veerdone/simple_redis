@@ -1,23 +1,19 @@
 package command
 
 import (
-	"bytes"
 	"strconv"
 
 	"github.com/veerdone/simple_redis/db"
 )
 
 func LPushCmd(d *db.DB, data []byte) []byte {
-	splitBytes := bytes.SplitN(data, spaceSplit, 2)
-	if len(splitBytes) != 2 {
-		return errResp(WrongNumArgReply)
+	sd := CheckArgsNumAndKeyExist(data, 2, d)
+	if len(sd.errBytes) != 0 {
+		return sd.errBytes
 	}
 
-	key := string(spaceSplit[0])
-	entity := d.Get(key)
-	if entity == nil {
-		return errResp(NilReply)
-	}
+	entity := sd.entity
+	splitBytes := sd.splitBytes
 	if entity.Types != db.LIST {
 		return errResp(WrongTypeReply)
 	}
@@ -48,16 +44,13 @@ func LPopCmd(d *db.DB, data []byte) []byte {
 }
 
 func RPushCmd(d *db.DB, data []byte) []byte {
-	splitBytes := bytes.SplitN(data, spaceSplit, 2)
-	if len(splitBytes) != 2 {
-		return errResp(WrongNumArgReply)
+	sd := CheckArgsNumAndKeyExist(data, 2, d)
+	if len(sd.errBytes) != 0 {
+		return sd.errBytes
 	}
 
-	key := string(spaceSplit[0])
-	entity := d.Get(key)
-	if entity == nil {
-		return errResp(NilReply)
-	}
+	entity := sd.entity
+	splitBytes := sd.splitBytes
 	if entity.Types != db.LIST {
 		return errResp(WrongTypeReply)
 	}
@@ -88,16 +81,13 @@ func RPopCmd(d *db.DB, data []byte) []byte {
 }
 
 func LIndexCmd(d *db.DB, data []byte) []byte {
-	splitBytes := bytes.SplitN(data, spaceSplit, 2)
-	if len(splitBytes) != 2 {
-		return errResp(WrongNumArgReply)
+	sd := CheckArgsNumAndKeyExist(data, 2, d)
+	if len(sd.errBytes) != 0 {
+		return sd.errBytes
 	}
 
-	key := string(splitBytes[0])
-	entity := d.Get(key)
-	if entity == nil {
-		return errResp(NilReply)
-	}
+	entity := sd.entity
+	splitBytes := sd.splitBytes
 	if entity.Types != db.LIST {
 		return errResp(WrongTypeReply)
 	}
@@ -111,16 +101,13 @@ func LIndexCmd(d *db.DB, data []byte) []byte {
 }
 
 func LRangeCmd(d *db.DB, data []byte) []byte {
-	splitBytes := bytes.SplitN(data, spaceSplit, 3)
-	if len(splitBytes) != 3 {
-		return errResp(WrongNumArgReply)
+	sd := CheckArgsNumAndKeyExist(data, 3, d)
+	if len(sd.errBytes) != 0 {
+		return sd.errBytes
 	}
 
-	key := string(splitBytes[0])
-	entity := d.Get(key)
-	if entity == nil {
-		return errResp(NilReply)
-	}
+	entity := sd.entity
+	splitBytes := sd.splitBytes
 	if entity.Types != db.LIST {
 		return errResp(WrongTypeReply)
 	}
