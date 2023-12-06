@@ -27,10 +27,24 @@ func IntToBytes(i int, b []byte) []byte {
 	if len(b) == 0 {
 		b = make([]byte, 4)
 	}
-	b[0] = byte((i>>24) & 0xFF)
-	b[1] = byte((i>>16) & 0xFF)
-	b[2] = byte((i>>8) & 0xFF)
+	b[0] = byte((i >> 24) & 0xFF)
+	b[1] = byte((i >> 16) & 0xFF)
+	b[2] = byte((i >> 8) & 0xFF)
 	b[3] = byte(i & 0xFF)
 
 	return b
+}
+
+func EqualBytes(a, b []byte) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
 }

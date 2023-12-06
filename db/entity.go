@@ -22,6 +22,7 @@ const (
 	STRING uint8 = 1
 	INT    uint8 = 2
 	LIST   uint8 = 3
+    SET uint8 = 4
 )
 
 type Entity struct {
